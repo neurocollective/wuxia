@@ -5,6 +5,8 @@ import (
 	// "github.com/gin-gonic/gin"
 	"fmt"
 	"reflect"
+	"github.com/neurocollective/wuxia/paths"
+	"github.com/neurocollective/wuxia/components"
 )
 
 func main() {
@@ -25,10 +27,14 @@ func main() {
 
 		fmt.Println("doc.Paths:", doc.Paths)
 		fmt.Println("doc.Components:", doc.Components)
-		root, present := doc.Paths["/pets"]
-		fmt.Println("root:", root)
+		slashPets, present := doc.Paths["/pets"]
+		fmt.Println("slashPets:", slashPets)
 		fmt.Println("present:", present)
-		fmt.Println("reflect.TypeOf(root)", reflect.TypeOf(root))
+		fmt.Println("reflect.TypeOf(slashPets)", reflect.TypeOf(slashPets))
+
+		components := components.BuildComponents(doc.Components)
+
+		paths.BuildPaths(components, doc.Paths)
 
 		// consumes, consumesPresent := doc["consumes"]
 		// definitions, definitionsPresent := doc["definitions"]
