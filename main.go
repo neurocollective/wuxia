@@ -23,11 +23,12 @@ func main() {
 		fmt.Println(err.Error)
 	} else {
 
-		fmt.Println(doc.Paths)
-		root, present := doc.Paths["/"]
-		fmt.Println(root)
-		fmt.Println(present)
-		fmt.Println(reflect.TypeOf(root))
+		fmt.Println("doc.Paths:", doc.Paths)
+		fmt.Println("doc.Components:", doc.Components)
+		root, present := doc.Paths["/pets"]
+		fmt.Println("root:", root)
+		fmt.Println("present:", present)
+		fmt.Println("reflect.TypeOf(root)", reflect.TypeOf(root))
 
 		// consumes, consumesPresent := doc["consumes"]
 		// definitions, definitionsPresent := doc["definitions"]
