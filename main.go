@@ -30,6 +30,13 @@ func main() {
 
 	schema, err := generation.ReadDump()
 
+	for _, tableSchema := range schema.Tables {
+		structString := tableSchema.GetStructString()
+		fmt.Println(structString)
+	}
+
+	return
+
 	client, err := BuildPostgresClient("user=postgres password=postgres dbname=postgres sslmode=disable")
 
 	if err != nil {
