@@ -2,8 +2,10 @@ package structs
 
 import (
 	"database/sql"
-	"strings"
 	"log"
+	"strings"
+	//"unicode"
+
 	"codeberg.org/neurocollective/wuxia/lib"
 )
 
@@ -19,12 +21,12 @@ import (
 type Expenditure struct {
 	Id           *lib.NotNull[int]     `json:"id"`
 	UserId       *lib.NotNull[int]     `json:"userId"`
-	CategoryId   *sql.Null[int]    `json:"categoryId"`
+	CategoryId   *sql.Null[int]        `json:"categoryId"`
 	Value        *lib.NotNull[float32] `json:"value"`
 	Description  *lib.NotNull[string]  `json:"description"`
 	DateOccurred *lib.NotNull[string]  `json:"dateOccurred"`
-	CreateDate   *sql.Null[string] `json:"createDate"`
-	ModifiedDate *sql.Null[string] `json:"modifiedDate"`
+	CreateDate   *sql.Null[string]     `json:"createDate"`
+	ModifiedDate *sql.Null[string]     `json:"modifiedDate"`
 }
 
 func (e Expenditure) ColumnNames() []string {
@@ -168,4 +170,102 @@ func ReceiveExpenditures(rows *sql.Rows) ([]Expenditure, error) {
 	}
 
 	return rowArray[:index], nil
+}
+
+const TEXT = "text"
+const VARCHAR = "varchar"
+const INTEGER = "integer"
+const NUMERIC = "numeric"
+const TIMESTAMP = "timestamp"
+const NOT = "not"
+const NULL = "null"
+const SPACE = " "
+
+type ColumnDefinition struct {
+	Name     string
+	Type     string
+	Nullable bool
+	Tag      string
+}
+
+type TableSchema struct {
+	Name    string
+	Columns []ColumnDefinition
+}
+
+type Schema struct {
+	Tables []TableSchema
+}
+
+func TranslateTypeToGo(sqlType string) string {
+	if sqlType == TEXT || sqlType == VARCHAR {
+		return "string"
+	}
+	if sqlType == NUMERIC {
+		return "float32"
+	}
+	if sqlType == INTEGER {
+		return "int"
+	}
+	if sqlType == TIMESTAMP {
+		return "string"
+	}
+	return ""
+}
+
+func GetNullableWuxiaType(goType string) string {
+	return "*sql.Null[" + goType + "]"
+}
+
+func GetNotNullWuxiaType(goType string) string {
+	return "*lib.NotNull[" + goType + "]"
+}
+
+func TranslateGoTypeToWuxia(goType string, nullable bool) string {
+	if nullable {
+		return GetNullableWuxiaType(goType)
+	}
+	return GetNotNullWuxiaType(goType)
+}
+
+func UpperCaseColumnName(name string) string {
+
+	characters := make([]string, 0, len(name))
+
+	for index, rune := range name {
+		if index > 0 {
+			characters = append(characters, string(rune))
+		} else {
+			asString := string(rune)
+			characters = append(characters, strings.ToUpper(asString))
+		}
+	}
+	return strings.Join(characters, "")
+}
+
+func (ts TableSchema) GetStructString() string {
+
+	lines := make([]string, 0, len(ts.Columns)+2)
+
+	lines = append(lines, "type "+ts.Name+" struct {")
+
+	for _, column := range ts.Columns {
+		goType := TranslateTypeToGo(column.Type)
+		elements := []string{
+			SPACE,
+			SPACE,
+			UpperCaseColumnName(column.Name),
+			SPACE,
+			TranslateGoTypeToWuxia(goType, column.Nullable),
+			SPACE,
+			column.Tag,
+		}
+		nextLine := strings.Join(elements, "")
+
+		lines = append(lines, nextLine)
+	}
+
+	lines = append(lines, "}")
+
+	return strings.Join(lines, "\n")
 }

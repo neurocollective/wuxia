@@ -6,9 +6,10 @@ import (
 	"log"
 	"os"
 
-	_ "github.com/lib/pq"
-	"codeberg.org/neurocollective/wuxia/structs"
+	"codeberg.org/neurocollective/wuxia/generation"
 	"codeberg.org/neurocollective/wuxia/lib"
+	"codeberg.org/neurocollective/wuxia/structs"
+	_ "github.com/lib/pq"
 )
 
 func BuildPostgresClient(connectionString string) (*sql.DB, error) {
@@ -27,6 +28,8 @@ func BuildPostgresClient(connectionString string) (*sql.DB, error) {
 
 func main() {
 
+	schema, err := generation.ReadDump()
+
 	client, err := BuildPostgresClient("user=postgres password=postgres dbname=postgres sslmode=disable")
 
 	if err != nil {
@@ -37,9 +40,9 @@ func main() {
 	// begin insert
 
 	expenditure := structs.Expenditure{
-		UserId: &lib.NotNull[int]{1},
-		CategoryId: &sql.Null[int]{0,false},
-		Value: &lib.NotNull[float32]{45.99},
+		UserId:      &lib.NotNull[int]{1},
+		CategoryId:  &sql.Null[int]{0, false},
+		Value:       &lib.NotNull[float32]{45.99},
 		Description: &lib.NotNull[string]{"stuff"},
 	}
 
