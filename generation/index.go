@@ -65,9 +65,9 @@ func ReadDump() (structs.Schema, error) {
 
 			cleanedToken := CleanToken(token)
 
-            if cleanedToken == "" {
-                continue
-            }
+			if cleanedToken == "" {
+				continue
+			}
 
 			var nextToken string
 			if index < len(tokens)-1 {
@@ -77,7 +77,7 @@ func ReadDump() (structs.Schema, error) {
 			if !scanningTable && index == 0 && cleanedToken == CREATE {
 
 				if nextToken == TABLE {
-                    fmt.Println("NEW TABLE, token:", cleanedToken)
+					fmt.Println("NEW TABLE, token:", cleanedToken)
 					// this is a table creation
 					scanningTable = true
 					columns = make([]structs.ColumnDefinition, 0, 100)
@@ -86,20 +86,20 @@ func ReadDump() (structs.Schema, error) {
 					columnIndex = -1
 					currentTable = structs.TableSchema{}
 					tables = append(tables, currentTable)
-                    continue
+					continue
 				} else {
-                    fmt.Println("what??")
-                }
+					fmt.Println("what??")
+				}
 			} else if scanningTable {
-                fmt.Println("Scanning table, token:", cleanedToken)  
-                if cleanedToken == END {
-                    fmt.Println("END OF COLUMN, token:", cleanedToken, "index:", index)               
-                    scanningTable = false
-                    columns = append(columns, currentColumn)
-                    currentTable.Columns = columns[:columnIndex+1]
-                    columnIndex = -1
-                } else if index == 0 {
-                    fmt.Println("NEW COLUMN, token:", cleanedToken, "index:", index)
+				fmt.Println("Scanning table, token:", cleanedToken)
+				if cleanedToken == END {
+					fmt.Println("END OF COLUMN, token:", cleanedToken, "index:", index)
+					scanningTable = false
+					columns = append(columns, currentColumn)
+					currentTable.Columns = columns[:columnIndex+1]
+					columnIndex = -1
+				} else if index == 0 {
+					fmt.Println("NEW COLUMN, token:", cleanedToken, "index:", index)
 					columnIndex += 1
 					currentColumn.Name = cleanedToken
 				} else if isAType(cleanedToken) {
@@ -108,8 +108,8 @@ func ReadDump() (structs.Schema, error) {
 					currentColumn.Nullable = false
 				}
 			} else {
-                fmt.Println("WTF, token:", cleanedToken)    
-            }
+				fmt.Println("WTF, token:", cleanedToken)
+			}
 		}
 	}
 
